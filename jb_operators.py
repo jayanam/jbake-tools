@@ -6,7 +6,7 @@ class JB_Bake_Op(Operator):
     bl_label = "Bake maps"
     bl_description = "Bake image maps for low and high poly objects" 
     bl_options = {'REGISTER', 'UNDO'} 
-
+    
     @classmethod
     def poll(cls, context):
       low_poly = context.scene.low_poly
@@ -28,7 +28,16 @@ class JB_Bake_Op(Operator):
                 node.color_space = "COLOR"
 
     def create_normal_img(self, node_tree):
-        return node_tree.nodes.new('ShaderNodeTexImage')
+        img_node = node_tree.nodes.new('ShaderNodeTexImage')
+        img_name = bpy.context.scene.low_poly.name + "_" + "normal"
+        img_width = bpy.context.scene.img_bake_width
+        img_height = bpy.context.scene.img_bake_height
+
+        image = bpy.data.images.new(img_name, width=img_width, height=img_height)
+        image.colorspace_settings.name = "Non-Color"
+
+        img_node.image = image
+        return img_node
 
     def create_normal_map(self, node_tree):
         return node_tree.nodes.new('ShaderNodeNormalMap')
@@ -39,6 +48,9 @@ class JB_Bake_Op(Operator):
           return node
 
       return None
+
+    def bake_normal_map(self):
+      bpy.ops.object.bake(type="NORMAL", use_selected_to_active=True)
 
     def execute(self, context):
 
@@ -52,6 +64,8 @@ class JB_Bake_Op(Operator):
       pri_shader_node = self.get_node("BSDF_PRINCIPLED", node_tree)
       if(pri_shader_node is None):
         return {'CANCELED'}
+
+      low_poly.select_set(True) 
 
       # 2. Check if there is a normal map attached already.
       #    If not, create a normal map and attach it
@@ -75,11 +89,16 @@ class JB_Bake_Op(Operator):
 
       # Use Cycles as renderer
       bpy.context.scene.render.engine = 'CYCLES'
+      bpy.context.scene.render.bake.cage_extrusion = context.scene.render.bake.cage_extrusion
+      bpy.context.scene.render.bake.max_ray_distance = context.scene.render.bake.max_ray_distance
 
       bpy.ops.object.select_all(action='DESELECT')
+
       high_poly.select_set(True) 
       low_poly.select_set(True) 
       bpy.context.view_layer.objects.active = low_poly
-      bpy.ops.object.bake(type="NORMAL", use_selected_to_active=True)
+      
+      self.bake_normal_map()
+      bpy.ops.object.select_all(action='DESELECT')
 
       return {'FINISHED'}
