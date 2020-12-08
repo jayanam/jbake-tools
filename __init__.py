@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Jayanam",
     "description" : "Blender Addon to simplify baking image maps",
     "blender" : (2, 80, 0),
-    "version" : (0, 2, 0),
+    "version" : (0, 2, 1),
     "location" : "View3D",
     "category" : "Object"
 }
@@ -34,7 +34,7 @@ bpy.types.Scene.low_poly = PointerProperty(type=bpy.types.Object)
 # High poly object with the details to bake
 bpy.types.Scene.high_poly = PointerProperty(type=bpy.types.Object)
 
-bpy.types.Scene.img_bake_width = bpy.props.IntProperty( name="Image Width", description="Width of image to bake", default = 1024)
+bpy.types.Scene.img_bake_width  = bpy.props.IntProperty( name="Image Width",  description="Width of image to bake", default = 1024)
 bpy.types.Scene.img_bake_height = bpy.props.IntProperty( name="Image Height", description="Height of image to bake", default = 1024)
 
 classes = ( JB_Bake_Op, JB_PT_Panel, JB_PT_Settings_Panel )

@@ -5,14 +5,18 @@ class JB_Bake_Op(Operator):
     bl_idname = "object.bake_op"
     bl_label = "Bake maps"
     bl_description = "Bake image maps for low and high poly objects" 
-    bl_options = {'REGISTER', 'UNDO'} 
+    bl_options = {'REGISTER'} 
+
+    def __init__(self):
+      self.__baking = False
     
     @classmethod
     def poll(cls, context):
+
       low_poly = context.scene.low_poly
       high_poly = context.scene.high_poly
 
-      return low_poly and high_poly
+      return (low_poly and high_poly) or self.__baking
 
     def add_link_by_index(self, node_tree, node, node2, output_name, input_index):
         node_tree.links.new(node.outputs[output_name], node2.inputs[input_index])   
@@ -54,6 +58,8 @@ class JB_Bake_Op(Operator):
 
     def execute(self, context):
 
+      self.__baking = True
+
       low_poly = context.scene.low_poly
       high_poly = context.scene.high_poly
       node_tree = low_poly.data.materials[0].node_tree
@@ -65,7 +71,9 @@ class JB_Bake_Op(Operator):
       if(pri_shader_node is None):
         return {'CANCELED'}
 
+      low_poly.hide_set(False)
       low_poly.select_set(True) 
+      bpy.ops.object.mode_set(mode='OBJECT')
 
       # 2. Check if there is a normal map attached already.
       #    If not, create a normal map and attach it
@@ -85,8 +93,6 @@ class JB_Bake_Op(Operator):
       else:
         normal_img_node = normal_map_node.inputs["Color"].links[0].from_node
       
-      bpy.ops.object.mode_set(mode='OBJECT')
-
       # Use Cycles as renderer
       bpy.context.scene.render.engine = 'CYCLES'
       bpy.context.scene.render.bake.cage_extrusion = context.scene.render.bake.cage_extrusion
@@ -94,11 +100,19 @@ class JB_Bake_Op(Operator):
 
       bpy.ops.object.select_all(action='DESELECT')
 
+      hp_hide = high_poly.hide_get()
+
+      high_poly.hide_set(False)
       high_poly.select_set(True) 
-      low_poly.select_set(True) 
+
+      low_poly.select_set(True)
       bpy.context.view_layer.objects.active = low_poly
-      
+
       self.bake_normal_map()
+
+      high_poly.hide_set(hp_hide)
       bpy.ops.object.select_all(action='DESELECT')
+
+      self.__baking = False
 
       return {'FINISHED'}
