@@ -101,8 +101,6 @@ class JB_Bake_Op(Operator):
       
       # Use Cycles as renderer
       bpy.context.scene.render.engine = 'CYCLES'
-      bpy.context.scene.render.bake.cage_extrusion = context.scene.render.bake.cage_extrusion
-      bpy.context.scene.render.bake.max_ray_distance = context.scene.render.bake.max_ray_distance
 
       bpy.ops.object.select_all(action='DESELECT')
 
