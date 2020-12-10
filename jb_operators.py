@@ -59,9 +59,15 @@ class JB_Bake_Op(Operator):
     def execute(self, context):
 
       self.__baking = True
-
+  
       low_poly = context.scene.low_poly
       high_poly = context.scene.high_poly
+
+      if len(low_poly.data.materials) == 0:
+        err_material = "Assign a material to {0} before baking"
+        self.report({'ERROR'}, err_material.format(low_poly.name) )
+        return {'CANCELLED'}    
+
       node_tree = low_poly.data.materials[0].node_tree
       
       # Bake the image maps from high poly to low poly
@@ -69,7 +75,7 @@ class JB_Bake_Op(Operator):
       # 1. Check if the low poly object has a principled shader
       pri_shader_node = self.get_node("BSDF_PRINCIPLED", node_tree)
       if(pri_shader_node is None):
-        return {'CANCELED'}
+        return {'CANCELLED'}
 
       low_poly.hide_set(False)
       low_poly.select_set(True) 
