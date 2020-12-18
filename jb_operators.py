@@ -16,7 +16,7 @@ class JB_Bake_Op(Operator):
       low_poly = context.scene.low_poly
       high_poly = context.scene.high_poly
 
-      return (low_poly and high_poly) or self.__baking
+      return (low_poly and high_poly)
 
     def add_link_by_index(self, node_tree, node, node2, output_name, input_index):
         node_tree.links.new(node.outputs[output_name], node2.inputs[input_index])   
