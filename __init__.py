@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Jayanam",
     "description" : "Blender Addon to simplify baking image maps",
     "blender" : (2, 80, 0),
-    "version" : (0, 2, 3),
+    "version" : (0, 2, 4),
     "location" : "View3D",
     "category" : "Object"
 }

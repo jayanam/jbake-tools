@@ -77,6 +77,10 @@ class JB_Bake_Op(Operator):
       if(pri_shader_node is None):
         return {'CANCELLED'}
 
+      # Use Cycles as renderer
+      render_engine_old = bpy.context.scene.render.engine
+      bpy.context.scene.render.engine = 'CYCLES'
+
       low_poly.hide_set(False)
       low_poly.select_set(True) 
       bpy.ops.object.mode_set(mode='OBJECT')
@@ -99,9 +103,6 @@ class JB_Bake_Op(Operator):
       else:
         normal_img_node = normal_map_node.inputs["Color"].links[0].from_node
       
-      # Use Cycles as renderer
-      bpy.context.scene.render.engine = 'CYCLES'
-
       bpy.ops.object.select_all(action='DESELECT')
 
       hp_hide = high_poly.hide_get()
@@ -117,6 +118,8 @@ class JB_Bake_Op(Operator):
       high_poly.hide_set(hp_hide)
       bpy.ops.object.select_all(action='DESELECT')
 
+      # reset render engine
+      bpy.context.scene.render.engine = render_engine_old
       self.__baking = False
 
       return {'FINISHED'}
