@@ -11,7 +11,7 @@ class JB_PT_Panel(Panel):
        
         layout = self.layout
         scene = context.scene
-        
+                
         row = layout.row()
         split = row.split(factor=0.4,align=True)
         col = split.column()
@@ -30,7 +30,7 @@ class JB_PT_Panel(Panel):
 
         row = layout.row()
         row.operator('object.bake_op', text='Bake maps', icon='MOD_BOOLEAN')
-
+               
 class JB_PT_Settings_Panel(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -54,9 +54,16 @@ class JB_PT_Settings_Panel(Panel):
 
         col = row.column()
         col.prop(context.scene, "img_bake_height", text="Height")
-
+        
+        row = layout.row()
+        row.prop(context.scene.render.bake, "normal_space", text="Normal Space")
+        
+        col = row.column()
         row = layout.row()
         row.prop(context.scene.render.bake, "use_cage", text="Use Cage")
+        
+
+
 
         if context.scene.render.bake.use_cage:
             row = layout.row()
