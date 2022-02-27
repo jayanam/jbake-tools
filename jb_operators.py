@@ -89,8 +89,6 @@ class JB_Bake_Op(Operator):
 
       self.create_normal_map(node_tree, pri_shader_node)
       
-      select_all()
-
       hp_hide = high_poly.hide_get()
       high_poly.hide_set(False)
       high_poly.select_set(True) 
