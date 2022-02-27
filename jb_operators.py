@@ -1,6 +1,8 @@
 import bpy
 from bpy.types import Operator
 
+from . utils.select_utils import *
+
 class JB_Bake_Op(Operator):
     bl_idname = "object.bake_op"
     bl_label = "Bake maps"
@@ -85,41 +87,44 @@ class JB_Bake_Op(Operator):
       low_poly.select_set(True) 
       bpy.ops.object.mode_set(mode='OBJECT')
 
-      # 2. Check if there is a normal map attached already.
-      #    If not, create a normal map and attach it
-      normal_map_node = None
-      if not pri_shader_node.inputs["Normal"].is_linked:
-        normal_map_node = self.create_normal_map(node_tree)
-        self.add_link(node_tree, normal_map_node, pri_shader_node, "Normal", "Normal")
-      else:
-        normal_map_node = pri_shader_node.inputs["Normal"].links[0].from_node
-
-      # 3. Now check if the normal map has an image texture assigned
-      #    If not, create an image texture node and attach it
-      normal_img_node = None
-      if not normal_map_node.inputs["Color"].is_linked:
-        normal_img_node = self.create_normal_img(node_tree)       
-        self.add_link(node_tree, normal_img_node, normal_map_node, "Color", "Color", True)
-      else:
-        normal_img_node = normal_map_node.inputs["Color"].links[0].from_node
+      self.create_normal_map(node_tree, pri_shader_node)
       
-      bpy.ops.object.select_all(action='DESELECT')
+      select_all()
 
       hp_hide = high_poly.hide_get()
-
       high_poly.hide_set(False)
       high_poly.select_set(True) 
-
       low_poly.select_set(True)
-      bpy.context.view_layer.objects.active = low_poly
+
+      make_active(low_poly)
 
       self.bake_normal_map()
 
       high_poly.hide_set(hp_hide)
-      bpy.ops.object.select_all(action='DESELECT')
+
+      deselect_all()
 
       # reset render engine
       bpy.context.scene.render.engine = render_engine_old
       self.__baking = False
 
       return {'FINISHED'}
+
+    def create_normal_map(self, node_tree, pri_shader_node):
+        # 2. Check if there is a normal map attached already.
+        #    If not, create a normal map and attach it
+        normal_map_node = None
+        if not pri_shader_node.inputs["Normal"].is_linked:
+          normal_map_node = self.create_normal_map(node_tree)
+          self.add_link(node_tree, normal_map_node, pri_shader_node, "Normal", "Normal")
+        else:
+          normal_map_node = pri_shader_node.inputs["Normal"].links[0].from_node
+
+        # 3. Now check if the normal map has an image texture assigned
+        #    If not, create an image texture node and attach it
+        normal_img_node = None
+        if not normal_map_node.inputs["Color"].is_linked:
+          normal_img_node = self.create_normal_img(node_tree)       
+          self.add_link(node_tree, normal_img_node, normal_map_node, "Color", "Color", True)
+        else:
+          normal_img_node = normal_map_node.inputs["Color"].links[0].from_node
