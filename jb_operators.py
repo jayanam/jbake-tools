@@ -33,7 +33,7 @@ class JB_Bake_Op(Operator):
             else:
                 node.color_space = "COLOR"
 
-    def create_normal_img(self, node_tree):
+    def create_normal_img_node(self, node_tree):
         img_node = node_tree.nodes.new('ShaderNodeTexImage')
         img_name = bpy.context.scene.low_poly.name + "_" + "normal"
         img_width = bpy.context.scene.img_bake_width
@@ -45,7 +45,7 @@ class JB_Bake_Op(Operator):
         img_node.image = image
         return img_node
 
-    def create_normal_map(self, node_tree):
+    def create_normal_map_node(self, node_tree):
         return node_tree.nodes.new('ShaderNodeNormalMap')
 
     def get_node(self, node_type, node_tree):
@@ -113,7 +113,7 @@ class JB_Bake_Op(Operator):
         #    If not, create a normal map and attach it
         normal_map_node = None
         if not pri_shader_node.inputs["Normal"].is_linked:
-          normal_map_node = self.create_normal_map(node_tree)
+          normal_map_node = self.create_normal_map_node(node_tree)
           self.add_link(node_tree, normal_map_node, pri_shader_node, "Normal", "Normal")
         else:
           normal_map_node = pri_shader_node.inputs["Normal"].links[0].from_node
@@ -122,7 +122,7 @@ class JB_Bake_Op(Operator):
         #    If not, create an image texture node and attach it
         normal_img_node = None
         if not normal_map_node.inputs["Color"].is_linked:
-          normal_img_node = self.create_normal_img(node_tree)       
+          normal_img_node = self.create_normal_img_node(node_tree)       
           self.add_link(node_tree, normal_img_node, normal_map_node, "Color", "Color", True)
         else:
           normal_img_node = normal_map_node.inputs["Color"].links[0].from_node
